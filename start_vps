@@ -1,0 +1,57 @@
+#!/bin/bash
+VPS_USER="roy"
+VPS_IP="212.28.178.233"
+VPS_PORT="22"
+SSH_KEY=""
+
+ssh_cmd() {
+    if [[ -n "$SSH_KEY" ]]; then
+        ssh -i "$SSH_KEY" -p "$VPS_PORT" "$VPS_USER@$VPS_IP" "$@"
+    else
+        ssh -p "$VPS_PORT" "$VPS_USER@$VPS_IP" "$@"
+    fi
+}
+
+menu() {
+    echo ""
+    echo "══════════════════════════════════════════════════"
+    echo "  🚀  VPS Quinto Elemento — Contabo"
+    echo "      $VPS_USER@$VPS_IP:$VPS_PORT"
+    echo "══════════════════════════════════════════════════"
+    echo "  [1] Conectar al VPS (shell interactiva)"
+    echo "  [2] Ver estado de contenedores Docker"
+    echo "  [3] Ver logs de n8n"
+    echo "  [4] Ver logs de Evolution API"
+    echo "  [5] Reiniciar stack Docker"
+    echo "  [6] Ver disco y memoria"
+    echo "  [7] Verificar certificados SSL"
+    echo "  [8] Ver estado UFW"
+    echo "  [q] Salir"
+    echo "══════════════════════════════════════════════════"
+    echo -n "  Elige una opción: "
+}
+
+ejecutar() {
+    case $1 in
+        1) ssh_cmd ;;
+        2) ssh_cmd "cd /opt/qe && docker compose ps" ;;
+        3) ssh_cmd "cd /opt/qe && docker compose logs n8n --tail=50" ;;
+        4) ssh_cmd "cd /opt/qe && docker compose logs evolution-api --tail=50" ;;
+        5) ssh_cmd "cd /opt/qe && docker compose restart" ;;
+        6) ssh_cmd "df -h / && echo '' && free -h" ;;
+        7) ssh_cmd "sudo certbot certificates" ;;
+        8) ssh_cmd "sudo ufw status" ;;
+        q) echo "  Hasta luego 👋"; exit 0 ;;
+        *) echo "  ⚠️  Opción no válida." ;;
+    esac
+}
+
+[[ -n "$1" ]] && { ejecutar "$1"; exit 0; }
+
+while true; do
+    menu
+    read -r opcion
+    ejecutar "$opcion"
+    echo ""
+    read -rp "  Presiona Enter para continuar..."
+done
