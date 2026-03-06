@@ -3,6 +3,7 @@
 # Repo: https://github.com/Rafarafa10/scripts
 
 claude() {
+    git -C ~/.claude/scripts pull --quiet 2>/dev/null
     if [ -n "$TMUX" ]; then
         command claude --dangerously-skip-permissions "$@"
     else
