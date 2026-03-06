@@ -10,3 +10,11 @@ claude() {
     fi
 }
 alias comfy="cd ~/ia/comfyui/comfyui && source ../venv/bin/activate && python main.py"
+
+bye_tmux() {
+    if [ -n "$TMUX" ]; then
+        tmux kill-session
+    else
+        echo "No estás en tmux"
+    fi
+}
