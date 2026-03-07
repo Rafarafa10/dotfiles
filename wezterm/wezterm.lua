@@ -254,16 +254,28 @@ config.keys = {
         local tab_id = window:active_tab():tab_id()
         tab_titles[tab_id] = line
 
-        -- Auto-color y SSH por nombre
-        local hooks = {
+        -- Auto-color y comando por nombre
+        local vps = {
           n8n       = { color = '#6B8E5A', cmd = 'ssh -p 22 roy@212.28.178.233' },
           openclaw  = { color = '#C47A8A', cmd = 'ssh openclaw@100.91.250.58' },
         }
 
-        local hook = hooks[name]
-        if hook then
-          tab_colors[tab_id] = hook.color
-          pane:send_text(hook.cmd .. '\n')
+        -- claude0-claude7: color naranja + ejecutar alias claude
+        -- Soporta: "claude0", "claude0 mi-proyecto", "claude0 openclaw mi-proyecto"
+        if name:match('^claude%d') then
+          tab_colors[tab_id] = '#DA7756'
+          local vps_key = name:match('^claude%d+%s+(%S+)')
+          if vps_key and vps[vps_key] then
+            pane:send_text(vps[vps_key].cmd .. '\n')
+            wezterm.time.call_after(3, function()
+              pane:send_text('claude\n')
+            end)
+          else
+            pane:send_text('claude\n')
+          end
+        elseif vps[name] then
+          tab_colors[tab_id] = vps[name].color
+          pane:send_text(vps[name].cmd .. '\n')
         end
       end
     end),
